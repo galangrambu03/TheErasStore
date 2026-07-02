@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'folklore';
+  src: url('./assets/fonts/FePIit2.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  /* 🔒 Daftarkan font custom */
+  --font-folklore: 'folklore', sans-serif;
+
+  /* 🔒 Semua akhiran warna wajib menggunakan TITIK KOMA (;), bukan koma (,) */
+  --color-lily-green: #7CCB5A;
+  --color-forest-green: #4F8F3A;
+  --color-mint-green: #B8E986;
+  --color-warm-yellow: #F7D154;
+  --color-cream: #FFF4DC;
+  --color-soft-brown: #8A5A3B;
+  --color-soft-pink: #F6B5C8;
+  --color-charcoal: #3B3B3B;
+}
