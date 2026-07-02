@@ -249,7 +249,7 @@ function App() {
                 Find your best <br />
                 <span className="text-white block mt-2 drop-shadow-lg">Era's</span>
               </h1>
-              <p className="text-sm md:text-base max-w-xl text-slate-200 leading-relaxed font-folklore">
+              <p className="text-sm md:text-base max-w-xl text-slate-200 leading-relaxed font-folklore bg-gray">
                 Hi <strong className="text-white">{user?.Username || "User"}</strong>!
                 Welcome to The Eras Store, we hope you can find your Era's!
               </p>
@@ -257,8 +257,8 @@ function App() {
           </section>
 
           {/* GRID PRODUK */}
-          <section className="py-16 px-6 md:px-12 lg:px-24">
-            <div className="mb-12"><h2 className="text-2xl font-bold text-slate-900 tracking-tight sm:text-3xl">Katalog Produk</h2></div>
+          <section className="py-16 px-6 md:px-12 lg:px-24 bg-[#929292]">
+            <div className="mb-12"><h2 className="text-2xl font-bold text-slate-900 tracking-tight sm:text-3xl font-folklore">Product Catalogue</h2></div>
             {loading ? <div className="text-center text-slate-400 font-medium py-12">Memuat produk...</div> : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 {products.map((product) => (
@@ -413,10 +413,10 @@ function ProductImageSlider({ gambarString, namaProduk }) {
   };
 
   return (
-    <div className='relative w-full h-full group overflow-hidden rounded-2xl bg-cream'>
+    <div className='relative w-full h-full group overflow-hidden rounded-2xl bg-[#abaaaa]'>
       <img
         src={images[currentIndex]}
-        alt={`${namaProduk} - ${currentIndex + 1}`} className='w-full h-full object-contain p-4 transition-transform duration-500 ease-in-out group-hover:scale-105'
+        alt={`${namaProduk} - ${currentIndex + 1}`} className='w-full h-full object-cover object-top p-4 transition-transform duration-500 ease-in-out group-hover:scale-105'
       />
 
       {images.length > 1 && (
@@ -437,7 +437,7 @@ function ProductImageSlider({ gambarString, namaProduk }) {
             {images.map((_, index) => (
               <span
                 key={index}
-                className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? 'bg-lily-green w-4' : 'bg-charcoal/30'
+                className={`w-2 h-2 rounded-full transition-all ${index === currentIndex ? 'bg-black w-4' : 'bg-charcoal/30'
                   }`}
               >
               </span>

@@ -8,10 +8,7 @@
 }
 
 @theme {
-  /* 🔒 Daftarkan font custom */
   --font-folklore: 'folklore', sans-serif;
-
-  /* 🔒 Semua akhiran warna wajib menggunakan TITIK KOMA (;), bukan koma (,) */
   --color-lily-green: #7CCB5A;
   --color-forest-green: #4F8F3A;
   --color-mint-green: #B8E986;
@@ -21,3 +18,4 @@
   --color-soft-pink: #F6B5C8;
   --color-charcoal: #3B3B3B;
 }
+
