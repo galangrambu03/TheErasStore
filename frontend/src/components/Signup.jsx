@@ -2,11 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-/**
- * Signup Component
- * Companion untuk Login component
- * Styling dan behavior serupa dengan Login
- */
 const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
     const [formData, setFormData] = useState({
         username: '',
@@ -21,16 +16,16 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
 
         // Validasi username
         if (!formData.username.trim()) {
-            newErrors.username = 'Username tidak boleh kosong';
+            newErrors.username = 'Username must be filled.';
         } else if (formData.username.length < 3) {
-            newErrors.username = 'Username minimal 3 karakter';
+            newErrors.username = 'Username must be at least 3 characters.';
         }
 
 
         if (!formData.password.trim()) {
-            newErrors.password = 'Password tidak boleh kosong';
+            newErrors.password = 'Password must be filled';
         } else if (formData.password.length < 6) {
-            newErrors.password = 'Password minimal 6 karakter';
+            newErrors.password = 'Password must be at least 6 characters';
         }
 
         setErrors(newErrors);
@@ -61,7 +56,7 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
             const firstError = Object.values(errors)[0];
             Swal.fire({
                 icon: 'warning',
-                title: 'Input Tidak Valid',
+                title: "Input Doesn't Valid",
                 text: firstError,
                 background: '#0d0d0d',
                 color: '#fff',
@@ -72,8 +67,8 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
             return;
         } if (formData.password.length < 6) {
             Swal.fire({
-                title: 'Password Terlalu Pendek!',
-                text: 'Demi keamanan, password minimal harus 8 karakter ya.',
+                title: "Password Too Short",
+                text: "For Safety, Please Make a Password of Minimum 6 Characters",
                 icon: 'warning',
                 background: '#0d0d0d',
                 color: '#fff',
@@ -96,8 +91,8 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
             // Signup berhasil
             Swal.fire({
                 icon: 'success',
-                title: 'Akun Berhasil Dibuat',
-                text: 'Selamat! Akun Anda sudah terdaftar. Silakan login.',
+                title: 'Account Succesfully Made!',
+                text: 'Congratulation Your Account Have Been Signed up!, Please Login',
                 background: '#0d0d0d',
                 color: '#fff',
                 confirmButtonColor: '#6366f1',
@@ -121,7 +116,7 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
 
             Swal.fire({
                 icon: 'error',
-                title: 'Pendaftaran Gagal',
+                title: 'Signup Failed',
                 text: errorMessage,
                 background: '#0d0d0d',
                 color: '#fff',
@@ -137,14 +132,14 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4">
+        <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4 font-folklore">
             <div className="w-full max-w-md">
                 {/* Card Form */}
                 <div className="bg-black/40 backdrop-blur-sm border border-white/5 rounded-2xl p-8 shadow-2xl">
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-white mb-2">Daftar</h1>
-                        <p className="text-gray-400 text-sm">Buat akun baru untuk melanjutkan</p>
+                        <h1 className="text-3xl font-bold text-white mb-2">Signup</h1>
+                        <p className="text-gray-400 text-sm">Make New Account to Continue</p>
                     </div>
 
                     {/* Form */}
@@ -160,7 +155,7 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
                                 name="username"
                                 value={formData.username}
                                 onChange={handleInputChange}
-                                placeholder="Pilih username Anda"
+                                placeholder="Choose Your Username"
                                 className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${errors.username
                                         ? 'border-red-500/50 bg-red-500/10 focus:border-red-500/70'
                                         : 'border-white/10 focus:border-white/20 focus:bg-white/10'
@@ -184,7 +179,7 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                placeholder="Minimal 6 karakter"
+                                placeholder="6 Characters Minimum"
                                 className={`w-full px-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:outline-none transition-all duration-200 ${errors.password
                                         ? 'border-red-500/50 bg-red-500/10 focus:border-red-500/70'
                                         : 'border-white/10 focus:border-white/20 focus:bg-white/10'
@@ -224,10 +219,10 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                         />
                                     </svg>
-                                    Mendaftar...
+                                    Signing Up
                                 </>
                             ) : (
-                                'Daftar Akun'
+                                'Signup'
                             )}
                         </button>
                     </form>
@@ -238,20 +233,20 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
                             <div className="w-full border-t border-white/10" />
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-black/40 text-gray-500">atau</span>
+                            <span className="px-2 bg-black/40 text-gray-500">Or</span>
                         </div>
                     </div>
 
                     {/* Login Link */}
                     <div className="text-center">
                         <p className="text-gray-400 text-sm">
-                            Sudah punya akun?{' '}
+                            Already Had an Account?{' '}
                             <button
                                 type="button"
                                 onClick={onSwitchToLogin}
                                 className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
                             >
-                                Masuk di sini
+                                Login Here
                             </button>
                         </p>
                     </div>
@@ -259,7 +254,7 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
 
                 {/* Footer Text */}
                 <div className="mt-6 text-center text-xs text-gray-600">
-                    <p>Data Anda aman bersama kami</p>
+                    <p>The Eras Store</p>
                 </div>
             </div>
         </div>

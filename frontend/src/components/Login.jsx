@@ -44,8 +44,8 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
       // Login berhasil
       Swal.fire({
         icon: 'success',
-        title: 'Login Berhasil',
-        text: `Selamat datang, ${response.data.user?.username || 'User'}!`,
+        title: 'Login Success',
+        text: `Welcome, ${response.data.user?.Username || 'User'}!`,
         background: '#0d0d0d',
         color: '#fff',
         confirmButtonColor: '#6366f1',
@@ -64,11 +64,11 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
       });
     } catch (error) {
       // Login gagal
-      const errorMessage = error.response?.data?.message || error.message || 'Terjadi kesalahan saat login';
+      const errorMessage = error.response?.data?.message || error.message || 'There had an error while login';
 
       Swal.fire({
         icon: 'error',
-        title: 'Login Gagal',
+        title: 'Login Failed',
         text: errorMessage,
         background: '#0d0d0d',
         color: '#fff',
@@ -84,20 +84,17 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4">
-      {/* Background gradient accent (subtle) */}
+    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4 font-folklore">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 -left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Main card */}
       <div className="relative w-full max-w-md">
         <div className="bg-black/40 backdrop-blur-xl border border-white/5 rounded-2xl p-8 shadow-2xl">
-          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Masuk</h1>
-            <p className="text-gray-400 text-sm">Silakan login ke akun Anda</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Login</h1>
+            <p className="text-gray-400 text-sm">Please Login to Your Account</p>
           </div>
 
           {/* Form */}
@@ -110,7 +107,7 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
               <input
                 id="username"
                 type="text"
-                placeholder="Masukkan username Anda"
+                placeholder="Input Your Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
@@ -126,7 +123,7 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
               <input
                 id="password"
                 type="password"
-                placeholder="Masukkan password Anda"
+                placeholder="Input Your Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
@@ -160,21 +157,21 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
               <div className="w-full border-t border-white/10" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-black/40 text-gray-500">atau</span>
+              <span className="px-2 bg-black/40 text-gray-500">Or</span>
             </div>
           </div>
 
           {/* Signup Link */}
           <div className="text-center">
             <p className="text-gray-400 text-sm">
-              Belum punya akun?{' '}
+              Don't Have an Account?{' '}
               <button
                 type="button"
                 onClick={onSwitchToSignup}
                 disabled={loading}
                 className="text-indigo-400 hover:text-indigo-300 font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Daftar di sini
+                Sign Up Here
               </button>
             </p>
           </div>
@@ -182,7 +179,7 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
 
         {/* Footer text */}
         <p className="text-center text-gray-600 text-xs mt-6">
-          Dengan login, Anda menyetujui Kebijakan Privasi kami
+          The Eras Store 
         </p>
       </div>
     </div>

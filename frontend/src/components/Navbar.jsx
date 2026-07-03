@@ -8,7 +8,7 @@ function Navbar({ user, currentView, setCurrentView, handleLogout, onOpenLogin }
         user?.user?.role === 'admin';
 
     return (
-        <nav className="w-full bg-black text-white sticky top-0 z-50 px-6 md:px-16 py-4 flex items-center justify-between border-b border-white/5">
+        <nav className="w-full bg-black text-white sticky top-0 z-50 px-6 md:px-16 py-4 flex items-center justify-between border-b border-white/5 font-folklore">
             <div onClick={() => setCurrentView('pembeli')}
                 className="text-xl font-folklore tracking-tight cursor-pointer select-none">
                 The Eras Store

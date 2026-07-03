@@ -9,6 +9,7 @@ import fs from 'fs';
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
 
 // Sajikan folder uploads secara statis agar bisa diakses browser
 app.use('/uploads', express.static('uploads'));
@@ -133,24 +134,24 @@ app.post('/api/login', (req, res) => {
                         error: 'Terjadi kesalahan sistem'
                     });
                 }
-                
+
                 if (isMatch) {
                     res.json({
                         success: true,
-                        message: 'Login Berhasil',
+                        message: 'Login Success',
                         user: user
                     });
                 } else {
                     res.status(401).json({
                         success: false,
-                        message: 'Username atau Password Salah'
+                        message: 'Wrong Username or Password'
                     });
                 }
             });
         } else {
             res.status(401).json({
                 success: false,
-                message: 'Username atau Password Salah'
+                message: 'Wrong Username or Password'
             });
         }
     });
@@ -168,7 +169,7 @@ app.get('/api/produk', (req, res) => {
 });
 
 // Endpoint Add Produk
-app.post('/api/produk', upload.array('image', 5), (req, res) => {
+app.post('/api/produk', upload.array('image', 10), (req, res) => {
     const { Kodeproduk, Namaproduk, Kategori, Harga, Stok, Gambar } = req.body;
 
     if (!Kodeproduk || !Namaproduk || !Kategori || !Harga || !Stok) {
@@ -176,7 +177,7 @@ app.post('/api/produk', upload.array('image', 5), (req, res) => {
     }
 
     let pathGambar = null;
-    if (req.files && req.files.length>0) {
+    if (req.files && req.files.length > 0) {
         pathGambar = req.files.map(file => `http://localhost:5000/uploads/${file.filename}`).join(',');
     } else if (Gambar) {
         pathGambar = Gambar;
@@ -218,7 +219,7 @@ app.put('/api/produk/:id', upload.array('image', 5), (req, res) => {
     const { Kodeproduk, Namaproduk, Kategori, Harga, Stok, Gambar } = req.body;
 
     const checkQuery = "SELECT Gambar FROM Produk WHERE ID = ?";
-    
+
     db.query(checkQuery, [id], (err, rows) => {
         if (err) {
             console.error('Error checking product:', err.message);
@@ -229,11 +230,11 @@ app.put('/api/produk/:id', upload.array('image', 5), (req, res) => {
             return res.status(404).json({ error: 'Produk tidak ditemukan' });
         }
 
-        let pathGambar = rows[0].Gambar; 
+        let pathGambar = rows[0].Gambar;
 
         if (req.files && req.files.length > 0) {
             pathGambar = req.files.map(file => `http://localhost:5000/uploads/${file.filename}`).join(',');
-        } 
+        }
         else if (Gambar) {
             pathGambar = Gambar;
         }
@@ -248,6 +249,41 @@ app.put('/api/produk/:id', upload.array('image', 5), (req, res) => {
             res.json({ success: true, message: "Produk Berhasil Diupdate!" });
         });
     });
+});
+
+app.post('/api/produk/decrease-stock', async (req, res) => {
+    try {
+        const productId = req.body.productId;
+
+        if (!productId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Product ID diperlukan'
+            });
+        }
+
+        await db.execute(
+            'UPDATE produk SET Stok = Stok - 1 WHERE ID = ? AND Stok > 0',
+            [productId]
+        );
+
+        const result = await db.execute(
+            'SELECT Stok FROM produk WHERE ID = ?',
+            [productId]
+        );
+
+        res.json({
+            success: true,
+            newStock: result
+        });
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 });
 
 const PORT = 5000;
