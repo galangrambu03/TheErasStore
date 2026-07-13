@@ -4,8 +4,9 @@ import axios from 'axios';
 function AdminOrders() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedBukti, setSelectedBukti] = useState(null); // Untuk modal preview gambar
+    const [selectedBukti, setSelectedBukti] = useState(null); 
 
+    // untuk menampilkan history order pada admin dashboard dari endpoint
     const fetchAdminOrders = async () => {
         try {
             const response = await axios.get('http://localhost:5000/api/admin/orders');
@@ -18,19 +19,10 @@ function AdminOrders() {
     };
 
     useEffect(() => {
-        fetchAdminOrders();
-    }, []);
+        fetchAdminOrders(); // menjalankan fungsi diatas
+    }, []); // hny sekali aj
 
-    const handleConfirmPayment = async (orderId) => {
-        if (!window.confirm(`Konfirmasi pembayaran untuk Order #${orderId}?`)) return;
-
-        try {
-            alert("Fitur konfirmasi instan berhasil!");
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
+    // jika loding 
     if (loading) {
         return (
             <div className="p-8 text-center font-folklore text-slate-500">
@@ -61,7 +53,9 @@ function AdminOrders() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
+                        {/* render setiap data dari database  */}
                         {orders.map((order) => (
+                            // setiap tabel dikasih id dari database
                             <tr key={order.Order_ID}> 
 
                                 <td className="py-4 px-6 text-slate-700 font-medium">
@@ -85,6 +79,7 @@ function AdminOrders() {
                                 </td>
 
                                 <td className="py-4 px-6">
+                                    {/* jika order sukses status jadi hijau, kl pending kunink oren  */}
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${order.Status.toLowerCase() === 'success'
                                             ? 'bg-green-100 text-green-700'
                                             : 'bg-amber-100 text-amber-700'
@@ -92,7 +87,7 @@ function AdminOrders() {
                                         {order.Status.toUpperCase()}
                                     </span>
                                 </td>
-
+                                        {/* cek bukti bayar biar bisa di view  */}
                                 <td className="py-4 px-6">
                                     {order.Bukti_Bayar ? (
                                         <a

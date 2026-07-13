@@ -17,7 +17,7 @@ export default function Detail({ isOpen, onClose, productData, onBuyNow }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl w-full max-w-3xl relative animate-in fade-in zoom-in-95 duration-200 text-slate-800">
+            <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-2xl w-full max-w-3xl relative animate-in fade-in zoom-in-95 duration-200 text-slate-800">
                 
                 <button onClick={onClose} className="absolute top-4 right-4 text-[#1a1a1a] hover:opacity-70 transition-opacity z-10">
                     <img src="https://www.svgrepo.com/show/525281/close-circle.svg" alt="Close" className="w-6 h-6" />
@@ -25,12 +25,10 @@ export default function Detail({ isOpen, onClose, productData, onBuyNow }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 items-start">
                     
-                    {/* SISI KIRI: Foto Produk */}
                     <div className="w-full aspect-square bg-slate-100 rounded-2xl overflow-hidden shadow-inner border border-slate-200 flex items-center justify-center">
                         <img src={mainImage} alt={namaProduk} className="w-full h-full object-cover object-center" />
                     </div>
 
-                    {/* SISI KANAN: Detail Informasi */}
                     <div className="flex flex-col justify-between h-full space-y-4">
                         <div>
                             {kategoriProduk && (
@@ -75,7 +73,6 @@ export default function Detail({ isOpen, onClose, productData, onBuyNow }) {
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

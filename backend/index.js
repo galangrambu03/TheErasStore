@@ -68,21 +68,23 @@ db.connect((err) => {
 // Endpoint SignUp
 app.post('/api/signup', (req, res) => {
     const { username, password } = req.body;
+    // jika username / password gak diisi 
     if (!username || !password) {
         return res.status(400).json({
             success: false,
             message: 'Username dan Password tidak boleh kosong'
         });
     }
-
+    // query sql 
     const checkUserQuery = 'SELECT * FROM login WHERE Username = ?';
 
+    // cek username apakah sudah terdaftar 
     db.query(checkUserQuery, [username], (err, result) => {
         if (err) {
             console.error('Error saat cek username: ', err);
             return res.status(500).json({ error: 'Terjadi kesalahan sistem' });
         }
-
+        // jika result lebih dr 0 berarti terdaftar, suruh pke yang lain 
         if (result.length > 0) {
             return res.status(400).json({
                 success: false,
@@ -90,6 +92,8 @@ app.post('/api/signup', (req, res) => {
             });
         }
 
+        // kalo misal username ny gak ada yang pake lanjut ke password 
+        // enkripsi pake bcript
         const saltRounds = 10;
         bcrypt.hash(password, saltRounds, (hashErr, hashedPassword) => {
             if (hashErr) {
@@ -97,8 +101,10 @@ app.post('/api/signup', (req, res) => {
                 return res.status(500).json({ error: 'Terjadi kesalahan sistem' });
             }
 
+            // query post ke database (username sama password)
             const insertQuery = 'INSERT INTO login (Username, Password) VALUES (?, ?)';
 
+            // post ke database / sign up 
             db.query(insertQuery, [username, hashedPassword], (insertErr, insertResult) => {
                 if (insertErr) {
                     console.error('Error saat register:', insertErr);
@@ -117,9 +123,12 @@ app.post('/api/signup', (req, res) => {
 
 // Endpoint Login
 app.post('/api/login', (req, res) => {
+    // variabel untuk simpan username, pw 
     const { username, password } = req.body;
+    // query mencocokan username dari inputan pengguna ke database 
     const query = 'SELECT * FROM login WHERE Username = ?';
 
+    // cek password bener apa enggak 
     db.query(query, [username], (err, result) => {
         if (err) {
             console.error('Login error:', err);
@@ -135,7 +144,7 @@ app.post('/api/login', (req, res) => {
                         error: 'Terjadi kesalahan sistem'
                     });
                 }
-
+                // jika cocok maka login sukses 
                 if (isMatch) {
                     res.json({
                         success: true,
@@ -143,6 +152,7 @@ app.post('/api/login', (req, res) => {
                         user: user
                     });
                 } else {
+                    // jika gagal maka username / pw nya salah 
                     res.status(401).json({
                         success: false,
                         message: 'Wrong Username or Password'
@@ -252,72 +262,45 @@ app.put('/api/produk/:id', upload.array('image', 5), (req, res) => {
     });
 });
 
-app.post('/api/produk/decrease-stock', async (req, res) => {
-    try {
-        const productId = req.body.productId;
-
-        if (!productId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Product ID diperlukan'
-            });
-        }
-
-        await db.execute(
-            'UPDATE produk SET Stok = Stok - 1 WHERE ID = ? AND Stok > 0',
-            [productId]
-        );
-
-        const result = await db.execute(
-            'SELECT Stok FROM produk WHERE ID = ?',
-            [productId]
-        );
-
-        res.json({
-            success: true,
-            newStock: result
-        });
-
-    } catch (error) {
-        console.error('Error:', error.message);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
-
 // Tambah ke keranjang
 app.post('/api/keranjang', (req, res) => {
     const { User_ID, Produk_ID } = req.body;
-
+    // query cek stok 
     const queryCheckStock = "SELECT Stok FROM Produk WHERE ID = ?";
     db.query(queryCheckStock, [Produk_ID], (err, productResult) => {
         if (err) return res.status(500).json({ error: err.message });
 
+        // jika gak ada hasilnya, berarti produknya gak ada 
         if (productResult.length === 0) {
             return res.status(404).json({ message: "Produk tidak ditemukan" });
         }
 
+        // variabel stok dari hasil pencarian produk 
         const stokTersedia = productResult[0].Stok;
 
+        // jika stoknya kurang daru atau sama dengan 0, tidak bisa di tambah ke keranjang 
         if (stokTersedia <= 0) {
             return res.status(400).json({ message: "Maaf, stok produk ini sudah habis!" });
         }
 
+        // query ambil keranjang dari user id dan produk id 
         const quertCheck = "Select * from keranjang where User_ID = ? and Produk_ID = ?";
         db.query(quertCheck, [User_ID, Produk_ID], (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
 
+            // jika ada produknya maka bisa di tambah
             if (result.length > 0) {
                 const jumlahAkanDatang = result[0].Jumlah + 1;
+                // jika nanti yang akan di add ke keranjang lebih banyak daripada stok, maka tidak bisa ditambah 
                 if (jumlahAkanDatang > stokTersedia) {
                     return res.status(400).json({
                         message: `Gagal menambah! Stok tidak mencukupi. Hanya tersisa ${stokTersedia} pcs.`
                     });
                 }
 
+                // query add ke keranjang 
                 const queryUpdate = 'update keranjang set Jumlah = Jumlah + 1 where User_ID = ? and Produk_ID = ?';
+                // add ke keranjang 
                 db.query(queryUpdate, [User_ID, Produk_ID], (err, updateResult) => {
                     if (err) return res.status(500).json({ error: err.message });
                     return res.json({ message: "Jumlah Produk Di Keranjang Berhasil Ditambah" });
@@ -333,6 +316,7 @@ app.post('/api/keranjang', (req, res) => {
     });
 });
 
+// endpoint 
 app.get('/api/keranjang/:userId', (req, res) => {
     const userId = req.params.userId;
 
@@ -345,8 +329,8 @@ app.get('/api/keranjang/:userId', (req, res) => {
     db.query(query, [userId], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
-    })
-})
+    });
+});
 
 // delete keranjang 
 app.delete('/api/keranjang/:id', (req, res) => {

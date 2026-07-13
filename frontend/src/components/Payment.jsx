@@ -13,9 +13,10 @@ const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
             setPreview(URL.createObjectURL(file));
         }
     };
-
+    // fungsi submit 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        //gd bukti transfer dibanned 
         if (!image) {
             alert("Silakan pilih foto bukti transfer terlebih dahulu!");
             return;
@@ -24,10 +25,12 @@ const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
         setLoading(true);
         setMessage('');
 
+        // buat variabel form data buat di post ke database 
         const formData = new FormData();
         formData.append('Order_ID', Order_ID);
         formData.append('image', image);
 
+        // post ke database lewat endpoint 
         try {
             const response = await fetch('http://localhost:5000/api/payment/confirm', {
                 method: 'POST',
@@ -50,36 +53,25 @@ const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
         }
     };
 
-    if (!Order_ID) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
-                <div className="p-8 text-center bg-white rounded-sm border border-slate-200 shadow-sm max-w-md w-full">
-                    <h3 className="font-folklore text-lg font-bold text-slate-800 mb-6">ID Pesanan tidak ditemukan.</h3>
-                    <button
-                        onClick={() => setCurrentView('pembeli')}
-                        className="w-full bg-[#1a1a1a] hover:bg-black text-white font-folklore font-semibold py-3 rounded-sm transition-all shadow-md"
-                    >
-                        ← Kembali ke Toko
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 py-16 px-6 md:px-12 lg:px-24">
             <div className="max-w-xl mx-auto">
+                {/* Button back to shop  */}
                 <button
+                    // jika di klik balik ke currentview pembeli / halaman utama 
                     onClick={() => setCurrentView('pembeli')}
                     className="mb-8 flex items-center gap-2 text-sm font-folklore font-bold text-slate-600 hover:text-black transition-colors"
                 >
-                    ← Cancel & Back to Shop
+                    ← Back to Shop
                 </button>
 
-                <h2 className="font-folklore text-2xl font-bold mb-6 text-slate-800">
-                    Complete Your Payment
+                <h2 className="text-2xl font mb-6">
+                    Complete Your Payment.
+                    <p className='text-sm py-2 font-bold'>
+                        Your payment progress will be saved at history page
+                    </p>
                 </h2>
-
                 <div className="bg-white rounded-sm border border-slate-200 shadow-sm overflow-hidden mb-6">
                     <div className="grid grid-cols-3 gap-4 bg-slate-50 p-4 border-b border-slate-200 text-xs md:text-sm font-folklore">
                         <div>
@@ -99,8 +91,8 @@ const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
                     </div>
 
                     <div className="p-6 bg-white border-b border-slate-100 space-y-3 font-folklore">
-                        <span className="inline-block bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm border border-blue-200">
-                            Manual Transfer Account
+                        <span className="inline-block bg-blue-50 text-blue-700 text-[13px] font-bold tracking-wider px-2 py-0.5 rounded-sm border border-blue-200">
+                            Transfer Information
                         </span>
                         <div className="grid grid-cols-2 gap-y-2 pt-2 text-sm">
                             <div className="text-slate-500">Bank Name</div>
@@ -118,7 +110,7 @@ const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="font-folklore">
                                 <label className="block text-sm font-bold text-slate-800 mb-2">
-                                    Upload Receipt / Bukti Transfer
+                                    Upload Your Proof of Transfer
                                 </label>
                                 <input
                                     type="file"

@@ -3,21 +3,7 @@ import TextType from "./TextType";
 
 function AboutUs() {
 
-    const images = {
-        debut: '',
-        fearless: '',
-        speakNow: '',
-        red: '',
-        album1989: '',
-        reputation: '',
-        lover: '',
-        folklore: '',
-        evermore: '',
-        midnights: '',
-        ttpd: '',
-        tloas: ''
-    }
-
+    // buat variabel lirik
     const lyrics = {
         debut: {
             song: "Our Song",
@@ -68,9 +54,12 @@ function AboutUs() {
             quote: '"Keep it 100 on the land, the sea, the sky"'
         }
     };
+
+    // menjadikan lirik menjadi array dan disimpan di variabel
     const lyricQuotesArray = Object.values(lyrics).map(
         (item) => `${item.quote} — ${item.song}`);
 
+    
     return (
         <section className="py-24 px-6 md:px-12 lg:px-24 bg-white border-b border-slate-200">
             <div className="max-w-4xl mx-auto text-center space-y-8">

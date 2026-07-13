@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, Suspense, lazy } from 'react';
 const Detail = lazy(() => import('./Detail'));
 
 function Archive({ products, handleRealAddToCart, setCurrentView }) {
+  // bikin variabel untuk simpan nama, bg, text, border, audio per album 
   const eras = [
     { name: "Taylor Swift", bg: "bg-[#e2ecc8]", text: "text-[#3d5a25]", border: "border-[#3d5a25]", audio: "/audio/1.mp3" },
     { name: "Fearless", bg: "bg-[#f4ebd0]", text: "text-[#b28d46]", border: "border-[#b28d46]", audio: "/audio/2.mp3" },
@@ -18,20 +19,28 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
     { name: 'I Knew it, I knew You', bg: 'bg-[#fef3c7]', text: "text-[#b45309]", border: "border-[#b45309]", audio: '/audio/13.mp3' }
   ];
 
+  // set bg normal (pas ga buka per album)
   const [currentBg, setCurrentBg] = useState("bg-[#f8fafc]");
+  // state detail produk lagi di buka ap tutup
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  // data produk yang lagi dilihat detailnya 
   const [selectedProductToDetail, setSelectedProductToDetail] = useState(null);
+  // status laguny lagi muter apa enggak
   const [isPlaying, setIsPlaying] = useState(false);
+  // nama album yang lagi play musik
   const [activeEraName, setActiveEraName] = useState("");
-
+  // tempat nyimpen scroll sampe mana 
   const observerRef = useRef(null);
+  // tempat nyimpen objek audio yang lagi jalan 
   const audioRef = useRef(null); 
+  // catatan path audio terakhir biar ga muter ulang lagu yg sama 
   const currentAudioPathRef = useRef(""); 
 
   const playEraAudio = (audioPath, eraName) => {
     if (!audioPath) return;
-    setActiveEraName(eraName);
-    
+    setActiveEraName(eraName); // simpen nama album yg aktif
+
+    // kalo ada lagu yang diputer terus lagunya masih sama dan di pause, terus usernya pencet play lagi bakalan masuk ke pause bukan dari awal
     if (currentAudioPathRef.current === audioPath) {
       if (audioRef.current && audioRef.current.paused) {
         audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
@@ -39,13 +48,15 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
       return;
     }
 
+    // kalo ganti album, matikan lagu sebelumnya
     if (audioRef.current) {
       audioRef.current.pause();
     }
 
+    // bikin objek audio baru, set biar loop, lalu play 
     audioRef.current = new Audio(audioPath);
     audioRef.current.loop = true; 
-    currentAudioPathRef.current = audioPath;
+    currentAudioPathRef.current = audioPath; // update catatan path lagu aktif
 
     audioRef.current.play()
       .then(() => {
@@ -57,6 +68,7 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
       });
   };
 
+  // fungsi pause lagu 
   const togglePlayback = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
@@ -72,45 +84,53 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
   const setSectionRef = (el) => {
     if (!el) return;
 
+    // buat fungsi pendeteksi posisi scroll 
     if (!observerRef.current) {
       observerRef.current = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
+            // cek apakah elemen album sudah masuk area layar
             if (entry.isIntersecting) {
+              // ambil data bg, audio, data nama dari elemen html 
               const eraBg = entry.target.getAttribute('data-bg');
               const eraAudio = entry.target.getAttribute('data-audio');
               const eraName = entry.target.getAttribute('data-name');
               
-              if (eraBg) setCurrentBg(eraBg);
-              if (eraAudio) playEraAudio(eraAudio, eraName); 
+              if (eraBg) setCurrentBg(eraBg); // ganti warna background nya 
+              if (eraAudio) playEraAudio(eraAudio, eraName);  // ganti musik otomatis 
             }
           });
         },
         {
-          threshold: 0.15, 
-          rootMargin: "-20% 0px -40% 0px"
+          threshold: 0.15, // elemen harus minimal kelihatan 15% baru ke trigger
+          rootMargin: "-20% 0px -40% 0px" // batasan area sensor di laar (fokus di tengah)
         }
       );
     }
 
-    observerRef.current.observe(el);
+    observerRef.current.observe(el); // mulai cek elemen album ini
   };
 
   useEffect(() => {
+    // fungsi cleanup (berjalan pas user ninggalin halaman archive)
     return () => {
-      if (observerRef.current) observerRef.current.disconnect();
+      if (observerRef.current) observerRef.current.disconnect(); // matikan fungsi pendeteksi scroll (biar gak abot)
       if (audioRef.current) {
-        audioRef.current.pause();
+        audioRef.current.pause(); // matikan musik biar gak bosyor ke halaman lain
         audioRef.current = null;
       }
     };
   }, []);
 
+
+  // fungsi pas diklik, buka popup detail
   const handleOpenDetail = (product) => {
     setSelectedProductToDetail(product);
     setIsDetailOpen(true);
   };
 
+  // cek apakag bg sekarang itu gelap (reputation/ midnights)
+  // buat nanti otomatis putih kalo bg nya gelap 
   const isDarkBg = currentBg === "bg-[#1a1a1a]" || currentBg === "bg-[#0f172a]";
 
   return (

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+// template sweet alert swal 
 const toast = {
     success: (message) => {
         Swal.fire({
@@ -26,9 +27,11 @@ const toast = {
 };
 
 function Cart({ user, setCurrentView, onCheckoutSuccess }) {
+    
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // fungsi get keranjang ambil dari endpoint
     const fetchCart = async () => {
         if (!user) return;
         setLoading(true);
@@ -44,10 +47,12 @@ function Cart({ user, setCurrentView, onCheckoutSuccess }) {
         }
     };
 
+    // menggunakan fungsi get keranjang
     useEffect(() => {
         fetchCart();
-    }, [user]);
+    }, [user]); // fetch hanya punyanya user aja
 
+    // fungssi delete produk di keranjang 
     const handleDeleteItem = async (keranjangID) => {
         if (!keranjangID) {
             toast.error('Invalid Cart ID');
@@ -64,7 +69,8 @@ function Cart({ user, setCurrentView, onCheckoutSuccess }) {
             toast.error('Error Deleting Product');
         }
     }
-
+    
+    // fungsi add jumlah produk di keranjang
     const handleUpdateQuantity = async (keranjangID, JumlahSaatIni, aksi) => {
         const jumlahBaru = aksi === 'tambah' ? JumlahSaatIni + 1 : JumlahSaatIni - 1;
 
@@ -84,6 +90,7 @@ function Cart({ user, setCurrentView, onCheckoutSuccess }) {
         }
     };
 
+    // hitung total harga di keranjang 
     const calculateTotal = () => {
         return cartItems.reduce((sum, item) => sum + (Number(item.Harga) * item.Jumlah), 0);
     };
@@ -96,9 +103,12 @@ function Cart({ user, setCurrentView, onCheckoutSuccess }) {
         );
     }
 
+    // fungsi checkout 
     const handleCheckout = async () => {
+        // jika blm login dibanned 
         if (!user) return;
 
+        // dikasih pertanyaan dulu apakah bener2 mau byr apa enggak 
         Swal.fire({
             title: 'Are you sure?',
             text: "Do you want to checkout your Era's items?",
@@ -107,6 +117,7 @@ function Cart({ user, setCurrentView, onCheckoutSuccess }) {
             confirmButtonColor: '#1a1a1a',
             cancelButtonColor: '#838383',
             confirmButtonText: 'Yes, Checkout!'
+        // jika iya bakalan dihitung total harganya
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
