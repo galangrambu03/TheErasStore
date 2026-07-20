@@ -7,8 +7,8 @@ export default function Edit({ isOpen, onClose, productData, onSave }) {
         Kategori: '',
         Harga: '',
         Stok: '',
-        Deskripsi: '', 
-        Gambar: '' 
+        Deskripsi: '',
+        Gambar: ''
     });
     const [selectedFiles, setSelectedFiles] = useState([]);
 
@@ -20,10 +20,10 @@ export default function Edit({ isOpen, onClose, productData, onSave }) {
                 Kategori: productData.Kategori || productData.kategori || '',
                 Harga: productData.Harga || productData.harga || '',
                 Stok: productData.Stok || productData.stok || '',
-                Deskripsi: productData.Deskripsi || productData.deskripsi || '', 
+                Deskripsi: productData.Deskripsi || productData.deskripsi || '',
                 Gambar: productData.Gambar || productData.gambar || ''
             });
-            setSelectedFiles([]); 
+            setSelectedFiles([]);
         }
     }, [productData, isOpen]);
 
@@ -31,13 +31,13 @@ export default function Edit({ isOpen, onClose, productData, onSave }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         const updatedData = {
             ...formProduct,
-            fileBaru: selectedFiles 
+            fileBaru: selectedFiles
         };
 
-        onSave(e, updatedData); 
+        onSave(e, updatedData);
     };
 
     return (
@@ -101,7 +101,19 @@ export default function Edit({ isOpen, onClose, productData, onSave }) {
                             className="w-full text-xs mt-1 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#1a1a1a] file:text-[#b2b2b2] hover:file:bg-[#000000] text-[#1a1a1a]"
                         />
                         {formProduct.Gambar && selectedFiles.length === 0 && (
-                            <p className="text-[10px] text-black/70 mt-1 truncate">Gambar saat ini: {formProduct.Gambar.split('/').pop()}</p>
+                            <div className="mt-2">
+                                <p className="text-[10px] text-black/70 mb-1">Gambar saat ini:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {formProduct.Gambar.split(',').map((img, idx) => (
+                                        <img
+                                            key={idx}
+                                            src={img.trim()}
+                                            alt={`Gambar produk ${idx + 1}`}
+                                            className="w-16 h-16 object-cover rounded-lg border border-[#b2b2b2]"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         )}
                     </div>
 

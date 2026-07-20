@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { error } from 'console';
 
 const app = express();
 app.use(cors());
@@ -21,7 +20,7 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
-// Konfigurasi Penyimpanan Multer
+// Konfigurasi Penyimpanan Multer (gambar produk)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -48,6 +47,42 @@ const upload = multer({
     }
 });
 
+// Sajikan folder audio-albums secara statis
+app.use('/audio-albums', express.static('audio-albums'));
+
+// Buat folder audio-albums kalau belum ada
+const audioDir = './audio-albums';
+if (!fs.existsSync(audioDir)) {
+    fs.mkdirSync(audioDir);
+}
+
+// Storage khusus audio album
+const audioStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'audio-albums/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// Multer instance khusus audio
+const uploadAudio = multer({
+    storage: audioStorage,
+    limits: { fileSize: 15 * 1024 * 1024 }, // audio biasanya lebih besar dari gambar
+    fileFilter: (req, file, cb) => {
+        const filetypes = /mp3|wav|m4a|ogg/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+        // Cek ekstensi saja (mimetype audio sering tidak konsisten antar browser)
+        if (extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Hanya diperbolehkan mengunggah file audio (mp3, wav, m4a, ogg)!'));
+    }
+});
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -64,6 +99,10 @@ db.connect((err) => {
         console.log('Terhubung ke database');
     }
 });
+
+// ============================================================
+// AUTH
+// ============================================================
 
 // Endpoint SignUp
 app.post('/api/signup', (req, res) => {
@@ -168,6 +207,65 @@ app.post('/api/login', (req, res) => {
     });
 });
 
+// ============================================================
+// ALBUMS
+// ============================================================
+
+// Endpoint Get All Albums (BARU — sebelumnya belum ada, makanya 404)
+app.get('/api/albums', (req, res) => {
+    db.query('SELECT * FROM albums ORDER BY id ASC', (err, result) => {
+        if (err) {
+            console.error('Error fetching albums:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(result);
+    });
+});
+
+// Endpoint Add Album (diperbaiki: dari await jadi callback, konsisten dgn endpoint lain)
+app.post('/api/albums', uploadAudio.single('audio'), (req, res) => {
+    const { name, bg_color, text_color, border_color } = req.body;
+
+    if (!name || !bg_color || !text_color || !border_color || !req.file) {
+        return res.status(400).json({ error: 'Semua field wajib diisi, termasuk file audio' });
+    }
+
+    const audio_url = `/audio-albums/${req.file.filename}`;
+
+    const query = 'INSERT INTO albums (name, bg_color, text_color, border_color, audio_url) VALUES (?, ?, ?, ?, ?)';
+
+    db.query(query, [name, bg_color, text_color, border_color, audio_url], (err, result) => {
+        if (err) {
+            console.error('Error adding album:', err.message);
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({ message: 'Album berhasil ditambahkan', id: result.insertId });
+    });
+});
+
+// Endpoint Hapus Album (opsional, berguna buat admin)
+app.delete('/api/albums/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'DELETE FROM albums WHERE id = ?';
+
+    db.query(query, [id], (err, result) => {
+        if (err) {
+            console.error('Error deleting album:', err.message);
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Album tidak ditemukan' });
+        }
+
+        res.json({ success: true, message: 'Album Berhasil Dihapus' });
+    });
+});
+
+// ============================================================
+// PRODUK
+// ============================================================
+
 // Endpoint Get All Produk
 app.get('/api/produk', (req, res) => {
     db.query('SELECT * FROM Produk', (err, result) => {
@@ -262,6 +360,10 @@ app.put('/api/produk/:id', upload.array('image', 5), (req, res) => {
     });
 });
 
+// ============================================================
+// KERANJANG
+// ============================================================
+
 // Tambah ke keranjang
 app.post('/api/keranjang', (req, res) => {
     const { User_ID, Produk_ID } = req.body;
@@ -316,7 +418,7 @@ app.post('/api/keranjang', (req, res) => {
     });
 });
 
-// endpoint 
+// endpoint get keranjang user
 app.get('/api/keranjang/:userId', (req, res) => {
     const userId = req.params.userId;
 
@@ -372,6 +474,10 @@ app.put('/api/keranjang/:id', (req, res) => {
         });
     });
 });
+
+// ============================================================
+// CHECKOUT & ORDER
+// ============================================================
 
 // checkout 
 app.post('/api/checkout', async (req, res) => {
@@ -432,7 +538,7 @@ app.post('/api/checkout', async (req, res) => {
     }
 });
 
-// History Order 
+// Endpoint get history order
 app.get('/api/orders/:userId', (req, res) => {
     const { userId } = req.params;
 
@@ -493,7 +599,7 @@ app.post('/api/payment/confirm', upload.single('image'), (req, res) => {
     db.query(queryUpdateOrder, [pathBukti, Order_ID], (err, result) => {
         if (err) {
             console.error("Error saat konfirmasi pembayaran:", err.message);
-            return res.status(500).json({ error: err.message }); // Sudah diperbaiki dari 'message' menjadi 'err.message'
+            return res.status(500).json({ error: err.message });
         }
 
         if (result.affectedRows === 0) {
@@ -508,6 +614,7 @@ app.post('/api/payment/confirm', upload.single('image'), (req, res) => {
     });
 });
 
+// endpoint get semua order (khusus admin)
 app.get('/api/admin/orders', (req, res) => {
     const query = `
     SELECT 
@@ -524,7 +631,7 @@ ORDER BY o.Tanggal_Order DESC;
 
     db.query(query, (err, result) => {
         if (err) {
-            console.error('Error fetching admin orders: ', error);
+            console.error('Error fetching admin orders: ', err);
             return res.status(500).json({ error: err.message });
         }
         res.json(result);

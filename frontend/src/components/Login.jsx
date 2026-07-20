@@ -94,9 +94,7 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
             <p className="text-gray-400 text-sm">Please Login to Your Account</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Username Input */}
             <div className="group">
               <label htmlFor="username" className="block text-xs font-semibold text-gray-300 mb-2 uppercase tracking-wide">
                 Username
@@ -112,7 +110,6 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
               />
             </div>
 
-            {/* Password Input */}
             <div className="group">
               <label htmlFor="password" className="block text-xs font-semibold text-gray-300 mb-2 uppercase tracking-wide">
                 Password
@@ -128,7 +125,6 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
               />
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -148,7 +144,6 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-white/10" />
@@ -158,7 +153,6 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
             </div>
           </div>
 
-          {/* Signup Link */}
           <div className="text-center">
             <p className="text-gray-400 text-sm">
               Don't Have an Account?{' '}
@@ -174,7 +168,6 @@ const Login = ({ onLoginSuccess, onSwitchToSignup }) => {
           </div>
         </div>
 
-        {/* Footer text */}
         <p className="text-center text-gray-600 text-xs mt-6">
           The Eras Store 
         </p>

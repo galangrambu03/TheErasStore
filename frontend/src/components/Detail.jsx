@@ -55,7 +55,6 @@ export default function Detail({ isOpen, onClose, productData, onBuyNow }) {
                             </div>
                         </div>
 
-                        {/* Stok & Tombol */}
                         <div className="space-y-3 pt-2">
                             <div className="flex items-center justify-between text-sm bg-slate-100/80 p-2.5 rounded-xl border border-slate-200/50">
                                 <span className="text-slate-500 font-medium">Stock Left:</span>

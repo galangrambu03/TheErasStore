@@ -8,10 +8,16 @@ const toast = {
         Swal.fire({
             toast: true,
             showConfirmButton: false,
-            timer: 1000,
+            timer: 3000,
             timerProgressBar: true,
             icon: 'success',
-            title: message
+            title: message,
+            customClass: {
+                popup: 'folk-folklore',
+                title: 'font-folkore',
+            },
+            showClass: { popup: 'animate__animated animate__zoomInDown' },
+            hideClass: { popup: 'animate__animated animate__zoomOutDown' }
         });
     },
     error: (message) => {
@@ -21,13 +27,19 @@ const toast = {
             timer: 3000,
             timerProgressBar: true,
             icon: 'error',
-            title: message
+            title: message,
+            customClass: {
+                popup: 'folk-folklore',
+                title: 'font-folkore',
+            },
+            showClass: { popup: 'animate__animated animate__zoomInDown' },
+            hideClass: { popup: 'animate__animated animate__zoomOutDown' }
         });
     }
 };
 
 function Cart({ user, setCurrentView, onCheckoutSuccess }) {
-    
+
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -69,7 +81,7 @@ function Cart({ user, setCurrentView, onCheckoutSuccess }) {
             toast.error('Error Deleting Product');
         }
     }
-    
+
     // fungsi add jumlah produk di keranjang
     const handleUpdateQuantity = async (keranjangID, JumlahSaatIni, aksi) => {
         const jumlahBaru = aksi === 'tambah' ? JumlahSaatIni + 1 : JumlahSaatIni - 1;
@@ -117,7 +129,7 @@ function Cart({ user, setCurrentView, onCheckoutSuccess }) {
             confirmButtonColor: '#1a1a1a',
             cancelButtonColor: '#838383',
             confirmButtonText: 'Yes, Checkout!'
-        // jika iya bakalan dihitung total harganya
+            // jika iya bakalan dihitung total harganya
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {

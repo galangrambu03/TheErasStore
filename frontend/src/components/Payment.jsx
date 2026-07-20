@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 
 const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
     const [image, setImage] = useState(null);
@@ -13,12 +14,48 @@ const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
             setPreview(URL.createObjectURL(file));
         }
     };
+    const toast = {
+        success: (message) => {
+            Swal.fire({
+                toast: true,
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true,
+                icon: 'success',
+                title: message,
+                position: 'center',
+                customClass: {
+                    popup: 'folk-folklore',
+                    title: 'font-folkore',
+                },
+                showClass: { popup: 'animate__animated animate__zoomInDown' },
+                hideClass: { popup: 'animate__animated animate__zoomOutDown' }
+            });
+        },
+        error: (message) => {
+            Swal.fire({
+                toast: true,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                icon: 'error',
+                title: message,
+                position: 'center',
+                customClass: {
+                    popup: 'folk-folklore',
+                    title: 'font-folkore',
+                },
+                showClass: { popup: 'animate__animated animate__zoomInDown' },
+                hideClass: { popup: 'animate__animated animate__zoomOutDown' }
+            });
+        }
+    };
     // fungsi submit 
     const handleSubmit = async (e) => {
         e.preventDefault();
         //gd bukti transfer dibanned 
         if (!image) {
-            alert("Silakan pilih foto bukti transfer terlebih dahulu!");
+            toast.error("Silakan pilih foto bukti transfer terlebih dahulu!");
             return;
         }
 
@@ -40,7 +77,7 @@ const Payment = ({ Order_ID, Total_Harga, setCurrentView }) => {
             const data = await response.json();
 
             if (response.ok) {
-                alert("Pembayaran Berhasil Dikonfirmasi!");
+                toast.success("Pembayaran Berhasil Dikonfirmasi!");
                 setCurrentView('history');
             } else {
                 setMessage(data.message || "Terjadi kesalahan saat konfirmasi.");

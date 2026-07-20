@@ -1,46 +1,44 @@
 import React, { useEffect, useRef, useState, Suspense, lazy } from 'react';
+import axios from 'axios';
+import { staticEras } from '../data/staticEras';
+
 const Detail = lazy(() => import('./Detail'));
 
 function Archive({ products, handleRealAddToCart, setCurrentView }) {
-  // bikin variabel untuk simpan nama, bg, text, border, audio per album 
-  const eras = [
-    { name: "Taylor Swift", bg: "bg-[#e2ecc8]", text: "text-[#3d5a25]", border: "border-[#3d5a25]", audio: "/audio/1.mp3" },
-    { name: "Fearless", bg: "bg-[#f4ebd0]", text: "text-[#b28d46]", border: "border-[#b28d46]", audio: "/audio/2.mp3" },
-    { name: "Speak Now", bg: "bg-[#f0dbf0]", text: "text-[#662d66]", border: "border-[#662d66]", audio: "/audio/3.mp3" },
-    { name: "Red", bg: "bg-[#f5e6e6]", text: "text-[#8b0000]", border: "border-[#8b0000]", audio: "/audio/4.mp3" },
-    { name: "1989", bg: "bg-[#e0f2fe]", text: "text-[#0369a1]", border: "border-[#0369a1]", audio: "/audio/5.mp3" },
-    { name: "Reputation", bg: "bg-[#1a1a1a]", text: "text-[#f8fafc]", border: "border-[#f8fafc]", audio: "/audio/6.mp3" },
-    { name: "Lover", bg: "bg-[#fce7f3]", text: "text-[#db2777]", border: "border-[#db2777]", audio: "/audio/7.mp3" },
-    { name: "folklore", bg: "bg-[#f1f5f9]", text: "text-[#475569]", border: "border-[#475569]", audio: "/audio/8.mp3" },
-    { name: "evermore", bg: "bg-[#fef3c7]", text: "text-[#78350f]", border: "border-[#78350f]", audio: "/audio/9.mp3" },
-    { name: "Midnights", bg: "bg-[#0f172a]", text: "text-[#93c5fd]", border: "border-[#93c5fd]", audio: "/audio/10.mp3" },
-    { name: "The Tortured Poets Department", bg: "bg-[#f8f6f0]", text: "text-[#2d2d2d]", border: "border-[#2d2d2d]", audio: "/audio/11.mp3" },
-    { name: "The Life of a Showgirl", bg: "bg-[#ffedd5]", text: "text-[#ea580c]", border: "border-[#ea580c]", audio: "/audio/12.mp3" },
-    { name: 'I Knew it, I knew You', bg: 'bg-[#fef3c7]', text: "text-[#b45309]", border: "border-[#b45309]", audio: '/audio/13.mp3' }
-  ];
+  const [dbAlbums, setDbAlbums] = useState([]);
 
-  // set bg normal (pas ga buka per album)
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/albums')
+      .then((res) => {
+        const formatted = res.data.map((a) => ({
+          name: a.name,
+          bg: a.bg_color,       // hex string, contoh "#ffedd5"
+          text: a.text_color,
+          border: a.border_color,
+          audio: `http://localhost:5000${a.audio_url}`,
+          isFromDb: true,       // flag buat bedain cara render style-nya
+        }));
+        setDbAlbums(formatted);
+      })
+      .catch((err) => console.error('Gagal mengambil album:', err));
+  }, []);
+
+  // Gabungan 13 album lama (Tailwind class) + album baru dari database (hex color)
+  const eras = [...staticEras, ...dbAlbums];
+
   const [currentBg, setCurrentBg] = useState("bg-[#f8fafc]");
-  // state detail produk lagi di buka ap tutup
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  // data produk yang lagi dilihat detailnya 
   const [selectedProductToDetail, setSelectedProductToDetail] = useState(null);
-  // status laguny lagi muter apa enggak
   const [isPlaying, setIsPlaying] = useState(false);
-  // nama album yang lagi play musik
   const [activeEraName, setActiveEraName] = useState("");
-  // tempat nyimpen scroll sampe mana 
   const observerRef = useRef(null);
-  // tempat nyimpen objek audio yang lagi jalan 
-  const audioRef = useRef(null); 
-  // catatan path audio terakhir biar ga muter ulang lagu yg sama 
-  const currentAudioPathRef = useRef(""); 
+  const audioRef = useRef(null);
+  const currentAudioPathRef = useRef("");
 
   const playEraAudio = (audioPath, eraName) => {
     if (!audioPath) return;
-    setActiveEraName(eraName); // simpen nama album yg aktif
+    setActiveEraName(eraName);
 
-    // kalo ada lagu yang diputer terus lagunya masih sama dan di pause, terus usernya pencet play lagi bakalan masuk ke pause bukan dari awal
     if (currentAudioPathRef.current === audioPath) {
       if (audioRef.current && audioRef.current.paused) {
         audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
@@ -48,27 +46,22 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
       return;
     }
 
-    // kalo ganti album, matikan lagu sebelumnya
     if (audioRef.current) {
       audioRef.current.pause();
     }
 
-    // bikin objek audio baru, set biar loop, lalu play 
     audioRef.current = new Audio(audioPath);
-    audioRef.current.loop = true; 
-    currentAudioPathRef.current = audioPath; // update catatan path lagu aktif
+    audioRef.current.loop = true;
+    currentAudioPathRef.current = audioPath;
 
     audioRef.current.play()
-      .then(() => {
-        setIsPlaying(true);
-      })
+      .then(() => setIsPlaying(true))
       .catch((err) => {
         console.log(err);
         setIsPlaying(false);
       });
   };
 
-  // fungsi pause lagu 
   const togglePlayback = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
@@ -84,64 +77,71 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
   const setSectionRef = (el) => {
     if (!el) return;
 
-    // buat fungsi pendeteksi posisi scroll 
     if (!observerRef.current) {
       observerRef.current = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            // cek apakah elemen album sudah masuk area layar
             if (entry.isIntersecting) {
-              // ambil data bg, audio, data nama dari elemen html 
               const eraBg = entry.target.getAttribute('data-bg');
               const eraAudio = entry.target.getAttribute('data-audio');
               const eraName = entry.target.getAttribute('data-name');
-              
-              if (eraBg) setCurrentBg(eraBg); // ganti warna background nya 
-              if (eraAudio) playEraAudio(eraAudio, eraName);  // ganti musik otomatis 
+              const isFromDb = entry.target.getAttribute('data-fromdb') === 'true';
+
+              if (eraBg) {
+                // kalau dari database, bg-nya hex color, jangan dipasang ke className
+                setCurrentBg(isFromDb ? { custom: eraBg } : eraBg);
+              }
+              if (eraAudio) playEraAudio(eraAudio, eraName);
             }
           });
         },
         {
-          threshold: 0.15, // elemen harus minimal kelihatan 15% baru ke trigger
-          rootMargin: "-20% 0px -40% 0px" // batasan area sensor di laar (fokus di tengah)
+          threshold: 0.15,
+          rootMargin: "-20% 0px -40% 0px"
         }
       );
     }
 
-    observerRef.current.observe(el); // mulai cek elemen album ini
+    observerRef.current.observe(el);
   };
 
   useEffect(() => {
-    // fungsi cleanup (berjalan pas user ninggalin halaman archive)
     return () => {
-      if (observerRef.current) observerRef.current.disconnect(); // matikan fungsi pendeteksi scroll (biar gak abot)
+      if (observerRef.current) observerRef.current.disconnect();
       if (audioRef.current) {
-        audioRef.current.pause(); // matikan musik biar gak bosyor ke halaman lain
+        audioRef.current.pause();
         audioRef.current = null;
       }
     };
   }, []);
 
-
-  // fungsi pas diklik, buka popup detail
   const handleOpenDetail = (product) => {
     setSelectedProductToDetail(product);
     setIsDetailOpen(true);
   };
 
-  // cek apakag bg sekarang itu gelap (reputation/ midnights)
-  // buat nanti otomatis putih kalo bg nya gelap 
-  const isDarkBg = currentBg === "bg-[#1a1a1a]" || currentBg === "bg-[#0f172a]";
+  // Deteksi bg gelap, dukung baik Tailwind class (statis) maupun hex (dari db)
+  const isDarkBg =
+    currentBg === "bg-[#1a1a1a]" ||
+    currentBg === "bg-[#0f172a]" ||
+    (typeof currentBg === 'object' && ['#1a1a1a', '#0f172a'].includes(currentBg.custom?.toLowerCase()));
+
+  // Style & className wrapper utama, mendukung dua sumber warna
+  const wrapperBgStyle = typeof currentBg === 'object' ? { backgroundColor: currentBg.custom } : {};
+  const wrapperBgClass = typeof currentBg === 'string' ? currentBg : '';
 
   return (
-    <div className={`min-h-screen ${currentBg} py-20 px-6 md:px-12 lg:px-24 transition-colors duration-1000 ease-in-out relative selection:bg-black/10`}>
-      
+    <div
+      className={`min-h-screen ${wrapperBgClass} py-20 px-6 md:px-12 lg:px-24 transition-colors duration-1000 ease-in-out relative selection:bg-black/10`}
+      style={wrapperBgStyle}
+    >
+
       <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-lg border border-black/5 transition-all duration-500 ${isPlaying ? 'opacity-100' : 'opacity-60 hover:opacity-100'}`}>
         <div className="text-right hidden sm:block">
           <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Now Playing</p>
           <p className="text-xs font-semibold font-folklore text-slate-800 max-w-[120px] truncate">{activeEraName || "Silence"}</p>
         </div>
-        <button 
+        <button
           onClick={togglePlayback}
           className={`w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md relative overflow-hidden group`}
         >
@@ -159,7 +159,7 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <button 
+        <button
           onClick={() => setCurrentView('pembeli')}
           className={`mb-12 text-xs uppercase tracking-widest font-bold opacity-60 hover:opacity-100 transition-all flex items-center gap-2 ${isDarkBg ? 'text-white' : 'text-black'}`}
         >
@@ -184,20 +184,34 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
 
             if (eraProducts.length === 0) return null;
 
+            // Header judul album: pakai className kalau statis, style kalau dari db
+            const titleClassName = era.isFromDb
+              ? 'text-3xl md:text-4xl font-normal font-folklore tracking-wide border-b pb-2 inline-block transition-colors duration-500'
+              : `text-3xl md:text-4xl font-normal font-folklore tracking-wide border-b border-current pb-2 ${era.text} inline-block transition-colors duration-500`;
+            const titleStyle = era.isFromDb
+              ? { color: era.text, borderColor: era.border }
+              : {};
+
+            const dividerClassName = era.isFromDb
+              ? 'h-[1px] flex-1 opacity-20'
+              : `h-[1px] flex-1 bg-current opacity-20 ${era.text}`;
+            const dividerStyle = era.isFromDb ? { backgroundColor: era.text } : {};
+
             return (
-              <div 
-                key={era.name} 
+              <div
+                key={era.name}
                 ref={setSectionRef}
-                data-bg={era.bg} 
-                data-audio={era.audio} 
+                data-bg={era.bg}
+                data-audio={era.audio}
                 data-name={era.name}
+                data-fromdb={era.isFromDb ? 'true' : 'false'}
                 className="pt-4 pb-4"
               >
                 <div className="mb-12 flex items-center gap-4">
-                  <h3 className={`text-3xl md:text-4xl font-normal font-folklore tracking-wide border-b border-current pb-2 ${era.text} inline-block transition-colors duration-500`}>
+                  <h3 className={titleClassName} style={titleStyle}>
                     {era.name}
                   </h3>
-                  <div className={`h-[1px] flex-1 bg-current opacity-20 ${era.text}`}></div>
+                  <div className={dividerClassName} style={dividerStyle}></div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
@@ -208,19 +222,19 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
 
                     return (
                       <div key={product.ID || product.id} className="flex flex-col group relative">
-                        
-                        <div 
+
+                        <div
                           onClick={() => handleOpenDetail(product)}
                           className="w-full aspect-[4/5] overflow-hidden bg-slate-100/50 mb-4 rounded-sm cursor-pointer shadow-sm group-hover:shadow-md transition-all duration-500 relative"
                         >
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500 z-10" />
-                          <img 
-                            loading="lazy" 
+                          <img
+                            loading="lazy"
                             src={
                               gambarRaw && typeof gambarRaw === 'string'
-                                ? gambarRaw.split(',')[0].trim() 
+                                ? gambarRaw.split(',')[0].trim()
                                 : 'https://via.placeholder.com/300'
-                            } 
+                            }
                             alt={nama}
                             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-700 ease-out"
                           />
@@ -237,8 +251,8 @@ function Archive({ products, handleRealAddToCart, setCurrentView }) {
                           <button
                             onClick={() => handleRealAddToCart(product.ID || product.id)}
                             className={`w-full mt-4 bg-transparent border text-xs tracking-widest font-semibold py-2.5 rounded-sm transition-all duration-300 ${
-                              isDarkBg 
-                                ? 'border-white/20 text-white hover:bg-white hover:text-black' 
+                              isDarkBg
+                                ? 'border-white/20 text-white hover:bg-white hover:text-black'
                                 : 'border-black/20 text-black hover:bg-black hover:text-white'
                             }`}
                           >

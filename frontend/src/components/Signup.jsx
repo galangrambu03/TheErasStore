@@ -3,6 +3,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
+    // bikin variabel buat nyimpen usn pw 
     const [formData, setFormData] = useState({
         username: '',
         password: '',
@@ -14,16 +15,18 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin }) => {
     const validateForm = () => {
         const newErrors = {};
 
-        // Validasi username
+        // Validasi username harus diizi
         if (!formData.username.trim()) {
             newErrors.username = 'Username must be filled.';
+        // kl misal usernem ngisi kurg 3 karakter bakal dibanned
         } else if (formData.username.length < 3) {
             newErrors.username = 'Username must be at least 3 characters.';
         }
 
-
+        // pw harus diizi dong masa kosong
         if (!formData.password.trim()) {
             newErrors.password = 'Password must be filled';
+        // kl misal ngisi pw kurang dr 6 dibanned 
         } else if (formData.password.length < 6) {
             newErrors.password = 'Password must be at least 6 characters';
         }

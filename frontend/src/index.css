@@ -28,3 +28,7 @@ html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;             
 }
+.swal2-popup,
+.swal2-title {
+  font-family: 'Folklore', sans-serif !important;
+}

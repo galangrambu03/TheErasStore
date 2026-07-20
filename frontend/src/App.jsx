@@ -4,7 +4,6 @@ import Navbar from './components/Navbar';
 import Swal from 'sweetalert2';
 import Login from './components/Login';
 import Signup from './components/Signup';
-import Buttons from './components/Button';
 import Edit from './components/Edit';
 import Footer from './components/Footer';
 import Detail from './components/Detail';
@@ -15,6 +14,10 @@ import AboutUs from './components/AboutUs';
 import Archive from './components/Archive';
 import Payment from './components/Payment';
 import AdminOrders from './components/Adminorders';
+import 'animate.css';
+import Album from './components/Album';
+import AddAlbumForm from './components/AddAlbumForm';
+import { staticEras } from './data/staticEras';
 import BgFolklore from './assets/picture/dashboard-folklore (1).jpg';
 
 // Custom toast wrapper using SweetAlert2
@@ -26,7 +29,14 @@ const toast = {
       timer: 1000,
       timerProgressBar: true,
       icon: 'success',
-      title: message
+      title: message,
+      position: 'center',
+      customClass: {
+        popup: 'folk-folklore',
+        title: 'font-folkore',
+      },
+      showClass: { popup: 'animate__animated animate__zoomInDown' },
+      hideClass: { popup: 'animate__animated animate__zoomOutDown' }
     });
   },
   error: (message) => {
@@ -36,7 +46,14 @@ const toast = {
       timer: 3000,
       timerProgressBar: true,
       icon: 'error',
-      title: message
+      title: message,
+      position: 'center',
+      customClass: {
+        popup: 'folk-folklore',
+        title: 'font-folkore',
+      },
+      showClass: { popup: 'animate__animated animate__zoomInDown' },
+      hideClass: { popup: 'animate__animated animate__zoomOutDown' }
     });
   }
 };
@@ -59,10 +76,7 @@ function App() {
   const [authView, setAuthView] = useState(null);
   const [currentOrderId, setCurrentOrderId] = useState(null);
   const [currentTotalHarga, setCurrentTotalHarga] = useState(0);
-
   const [currentView, setCurrentView] = useState('pembeli');
-
-  // STATE BARU: Untuk navigasi internal menu admin ('products' atau 'payments')
   const [adminTab, setAdminTab] = useState('products');
 
   const [products, setProducts] = useState([]);
@@ -74,6 +88,17 @@ function App() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedProductToEdit, setSelectedProductToEdit] = useState(null);
   const inputFileRef = React.useRef(null);
+  const [dbAlbums, setDbAlbums] = useState([]);
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/albums')
+      .then((res) => setDbAlbums(res.data))
+      .catch((err) => console.error('Gagal mengambil album:', err));
+  }, []);
+
+  const allEraOptions = [
+    ...staticEras.map((e) => e.name),
+    ...dbAlbums.map((a) => a.name),
+  ];
 
   const [formProduct, setFormProduct] = useState({
     Kodeproduk: '',
@@ -262,7 +287,7 @@ function App() {
       toast.success(response.data.message || "The Product Successfully Added to Your Cart");
     } catch (error) {
       console.error('Error Add to Cart:', error);
-      toast.error(error.response?.data?.error || "Unable to Add Product");
+      toast.error(error.response?.data?.error || "Sorry There Are No Stock Left For This Product ");
     }
   };
 
@@ -299,100 +324,115 @@ function App() {
         />
       )}
 
+      {/* ========== PEMBELI VIEW ========== */}
       {currentView === 'pembeli' && authView === null && (
         <>
-          <section className="relative w-full min-h-[500px] md:min-h-[600px] flex items-center bg-black py-20 px-4 md:px-8 overflow-hidden">
+          {/* Hero Section - Fully Responsive */}
+          <section className="relative w-full min-h-[400px] sm:min-h-[450px] md:min-h-[550px] lg:min-h-[600px] xl:min-h-[700px] flex items-center bg-black py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-8 lg:px-12 overflow-hidden">
             <img
               src={BgFolklore}
               alt="The Eras Visual"
-              className="absolute inset-0 w-full h-full object-cover opacity-50 object-center pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover opacity-40 sm:opacity-50 object-center pointer-events-none"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none" />
-            <div className="relative w-full max-w-[1600px] mx-auto z-10 text-left pl-8 md:pl-16 lg:pl-24 space-y-6">
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-folklore text-white/80 leading-tight">
+
+            <div className="relative w-full max-w-[1600px] mx-auto z-10 text-left px-2 sm:px-4 space-y-4 sm:space-y-6 md:space-y-8">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-folklore text-white/80 leading-tight">
                 <DecryptedText
                   text='Find Your Best'
                   idleDelay={1000}
-                /> <br />
-                <span className="text-white block mt-2 drop-shadow-lg">Era's</span>
+                />
+                <span className="text-white block mt-2 sm:mt-3 md:mt-4 drop-shadow-lg">Era's</span>
               </h1>
-              <p className="text-sm md:text-base max-w-xl text-slate-200 leading-relaxed font-folklore bg-gray">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg max-w-xs sm:max-w-sm md:max-w-md lg:max-w-xl text-slate-200 leading-relaxed font-folklore">
                 Hi <strong className="text-white">{user?.Username || "User"}</strong>!
                 Welcome to The Eras Store, we hope you can find your Era's!
               </p>
             </div>
           </section>
 
-          <AboutUs id='about'/>
+          <AboutUs id='about' />
 
-          <section className="py-16 px-6 md:px-12 lg:px-24 bg-gradient-to-b from-slate-50 to-slate-100" id='catalogue'>
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-slate-800 tracking-tight sm:text-3xl font-folklore">
-                Product Catalogue
-              </h2>
-            </div>
-            {loading ? (
-              <div className="text-center text-slate-500 font-medium py-12">
-                Memuat produk...
+          {/* Catalogue Section - Responsive Grid */}
+          <section className="py-8 sm:py-10 md:py-14 lg:py-16 xl:py-20 px-4 sm:px-6 md:px-8 lg:px-12 bg-gradient-to-b from-slate-50 to-slate-100" id='catalogue'>
+            <div className="w-full max-w-[1600px] mx-auto">
+              <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12">
+                <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-slate-800 tracking-tight font-folklore">
+                  Product Catalogue
+                </h2>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12">
-                {products.map((product, index) => {
-                  const isEven = index % 2 === 0;
-                  const tiltClass = isEven ? '-rotate-3' : 'rotate-3';
 
-                  return (
-                    <div key={product.ID} className="flex flex-col" onClick={() => {
-                      setSelectedProductToDetail(product);
-                      setisDetailOpen(true);
-                    }}>
+              {loading ? (
+                <div className="flex justify-center items-center py-16 sm:py-20 md:py-24">
+                  <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-slate-400 mb-3 sm:mb-4"></div>
+                    <p className="text-slate-500 font-medium text-sm sm:text-base">Memuat produk...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+                  {products.map((product, index) => {
+                    const isEven = index % 2 === 0;
+                    const tiltClass = isEven ? '-rotate-3' : 'rotate-3';
+
+                    return (
                       <div
-                        className={`group relative bg-white rounded-sm p-3 pb-8 flex flex-col transition-all duration-300 ${tiltClass} hover:rotate-0 hover:shadow-2xl cursor-pointer border border-slate-300 shadow-md`}
-                        style={{ perspective: '1000px' }}
+                        key={product.ID}
+                        className="flex flex-col h-full cursor-pointer group"
+                        onClick={() => {
+                          setSelectedProductToDetail(product);
+                          setisDetailOpen(true);
+                        }}
                       >
-                        <div className="w-full aspect-square overflow-hidden bg-slate-100 mb-6" style={{ borderRadius: '4px' }}>
-                          <ProductImageSlider
-                            gambarString={product.Gambar}
-                            namaProduk={product.Namaproduk}
-                          />
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRealAddToCart(product.ID);
-                          }}
-                          className="w-full bg-[#545454] hover:bg-[#838383] text-white font-folklore font-semibold py-3 rounded-sm transition-all"
+                        <div
+                          className={`relative bg-white rounded-sm p-2 sm:p-3 md:p-4 pb-4 sm:pb-6 md:pb-8 flex flex-col transition-all duration-300 ${tiltClass} group-hover:rotate-0 group-hover:shadow-2xl border border-slate-300 shadow-md h-full`}
+                          style={{ perspective: '1000px' }}
                         >
-                          Add To Cart
-                        </button>
-                      </div>
+                          <div className="w-full aspect-square overflow-hidden bg-slate-100 mb-3 sm:mb-4 md:mb-6 rounded-sm">
+                            <ProductImageSlider
+                              gambarString={product.Gambar}
+                              namaProduk={product.Namaproduk}
+                            />
+                          </div>
 
-                      <div className="mt-6 px-1">
-                        <span className="text-[15px] font-folklore font-bold tracking-widest text-slate-600">
-                          {product.Kategori}
-                        </span>
-                        <h3 className="text-sm font-folklore font-bold text-slate-900 mt-2">
-                          {product.Namaproduk}
-                        </h3>
-                        <div className="flex items-center justify-between mt-3">
-                          <p className="text-lg font-folklore font-bold text-slate-800">
-                            Rp {Number(product.Harga).toLocaleString('id-ID')}
-                          </p>
-                          <span className="text-xs text-slate-600 font-folklore">
-                            Stock: {product.Stok}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRealAddToCart(product.ID);
+                            }}
+                            className="w-full bg-[#545454] hover:bg-[#838383] active:bg-[#3a3a3a] text-white font-folklore font-semibold py-2 sm:py-2.5 md:py-3 rounded-sm transition-all text-xs sm:text-sm active:scale-95"
+                          >
+                            Add To Cart
+                          </button>
+                        </div>
+
+                        <div className="mt-3 sm:mt-4 md:mt-6 px-1">
+                          <span className="text-xs sm:text-sm font-folklore font-bold tracking-widest text-slate-600 line-clamp-1">
+                            {product.Kategori}
                           </span>
+                          <h3 className="text-xs sm:text-sm font-folklore font-bold text-slate-900 mt-1 sm:mt-2 line-clamp-2">
+                            {product.Namaproduk}
+                          </h3>
+                          <div className="flex items-center justify-between mt-2 sm:mt-3 gap-1 sm:gap-2">
+                            <p className="text-sm sm:text-base md:text-lg font-folklore font-bold text-slate-800">
+                              Rp {Number(product.Harga).toLocaleString('id-ID')}
+                            </p>
+                            <span className="text-xs text-slate-600 font-folklore flex-shrink-0">
+                              Stock: {product.Stok}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </section>
         </>
       )}
 
+      {/* ========== CART VIEW ========== */}
       {currentView === 'cart' && (
         <Cart
           user={user}
@@ -401,6 +441,7 @@ function App() {
         />
       )}
 
+      {/* ========== PAYMENT VIEW ========== */}
       {currentView === 'payment' && (
         <Payment
           Order_ID={currentOrderId}
@@ -409,6 +450,7 @@ function App() {
         />
       )}
 
+      {/* ========== ARCHIVE VIEW ========== */}
       {currentView === 'archive' && (
         <Archive
           products={products}
@@ -417,6 +459,16 @@ function App() {
         />
       )}
 
+      {/* ========== ALBUM VIEW (BARU) ==========
+          Ditaruh sejajar dengan view lain (cart, archive, history, dst),
+          BUKAN di dalam blok admin. currentView cuma bisa satu nilai
+          dalam satu waktu, jadi nge-nest 'album' di dalam blok 'admin'
+          bikin kondisinya mustahil terpenuhi. */}
+      {currentView === 'album' && (
+        <Album />
+      )}
+
+      {/* ========== HISTORY VIEW ========== */}
       {currentView === 'history' && (
         <OrderHistory
           user={user}
@@ -428,35 +480,50 @@ function App() {
         />
       )}
 
+      {/* ========== ADMIN PANEL ========== */}
       {currentView === 'admin' && (
-        <section className="w-full max-w-[1600px] mx-auto py-10 px-4 md:px-8 bg-[#b2b2b2]/10 rounded-3xl space-y-8">
+        <section className="w-full max-w-[1600px] mx-auto py-6 sm:py-8 md:py-10 lg:py-12 px-4 sm:px-6 md:px-8 lg:px-12 bg-[#b2b2b2]/10 rounded-2xl sm:rounded-3xl space-y-6 sm:space-y-8">
 
-          <div className="flex border-b border-slate-300 font-folklore text-sm gap-6 pb-2">
+          {/* Admin Tabs - Responsive */}
+          <div className="flex border-b border-slate-300 font-folklore text-xs sm:text-sm gap-3 sm:gap-6 pb-2 overflow-x-auto">
             <button
               onClick={() => setAdminTab('products')}
-              className={`pb-2 font-bold tracking-wide transition-all ${adminTab === 'products'
-                  ? 'text-black border-b-2 border-black'
-                  : 'text-slate-400 hover:text-slate-700'
+              className={`pb-2 font-bold tracking-wide transition-all whitespace-nowrap flex-shrink-0 ${adminTab === 'products'
+                ? 'text-black border-b-2 border-black'
+                : 'text-slate-400 hover:text-slate-700'
                 }`}
             >
               Manage Products
             </button>
             <button
               onClick={() => setAdminTab('payments')}
-              className={`pb-2 font-bold tracking-wide transition-all ${adminTab === 'payments'
-                  ? 'text-black border-b-2 border-black'
-                  : 'text-slate-400 hover:text-slate-700'
+              className={`pb-2 font-bold tracking-wide transition-all whitespace-nowrap flex-shrink-0 ${adminTab === 'payments'
+                ? 'text-black border-b-2 border-black'
+                : 'text-slate-400 hover:text-slate-700'
                 }`}
             >
               Customer Payments
             </button>
+            {/* Tab baru: Manage Albums */}
+            <button
+              onClick={() => setAdminTab('albums')}
+              className={`pb-2 font-bold tracking-wide transition-all whitespace-nowrap flex-shrink-0 ${adminTab === 'albums'
+                ? 'text-black border-b-2 border-black'
+                : 'text-slate-400 hover:text-slate-700'
+                }`}
+            >
+              Manage Albums
+            </button>
           </div>
 
+          {/* Products Tab - Responsive Grid */}
           {adminTab === 'products' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start w-full">
-              <div className="bg-[#b2b2b2] p-6 rounded-2xl border border-[#545454]/30 shadow-md space-y-4 w-full">
-                <h3 className="text-lg font-bold text-[#000000] font-folklore">Add New Product</h3>
-                <form onSubmit={handleSaveProduct} className="space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 items-start w-full">
+
+              {/* Add Product Form */}
+              <div className="bg-[#b2b2b2] p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-[#545454]/30 shadow-md space-y-4 sm:space-y-5 w-full">
+                <h3 className="text-base sm:text-lg font-bold text-[#000000] font-folklore">Add New Product</h3>
+                <form onSubmit={handleSaveProduct} className="space-y-3 sm:space-y-4">
                   <div>
                     <label className="text-xs font-semibold text-[#1a1a1a]">Product Code</label>
                     <input
@@ -464,7 +531,7 @@ function App() {
                       placeholder="P001"
                       value={formProduct.Kodeproduk}
                       onChange={(e) => setFormProduct({ ...formProduct, Kodeproduk: e.target.value })}
-                      className="w-full p-2.5 mt-1 text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-xl focus:outline-none focus:border-[#000000] placeholder-[#838383]"
+                      className="w-full p-2 sm:p-2.5 mt-1 text-xs sm:text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-lg sm:rounded-xl focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] placeholder-[#838383] transition-colors"
                       required
                     />
                   </div>
@@ -475,22 +542,25 @@ function App() {
                       placeholder="TTPD Vinyl"
                       value={formProduct.Namaproduk}
                       onChange={(e) => setFormProduct({ ...formProduct, Namaproduk: e.target.value })}
-                      className="w-full p-2.5 mt-1 text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-xl focus:outline-none focus:border-[#000000] placeholder-[#838383]"
+                      className="w-full p-2 sm:p-2.5 mt-1 text-xs sm:text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-lg sm:rounded-xl focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] placeholder-[#838383] transition-colors"
                       required
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-[#1a1a1a]">Category</label>
-                    <input
-                      type="text"
-                      placeholder="Vinyl, CD, Outfit"
+                    <label className="text-xs font-semibold text-[#1a1a1a]">Category (Era/Album)</label>
+                    <select
                       value={formProduct.Kategori}
                       onChange={(e) => setFormProduct({ ...formProduct, Kategori: e.target.value })}
-                      className="w-full p-2.5 mt-1 text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-xl focus:outline-none focus:border-[#000000] placeholder-[#838383]"
+                      className="w-full p-2 sm:p-2.5 mt-1 text-xs sm:text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-lg sm:rounded-xl focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] transition-colors"
                       required
-                    />
+                    >
+                      <option value="" disabled>Pilih Era / Album</option>
+                      {allEraOptions.map((eraName, idx) => (
+                        <option key={idx} value={eraName}>{eraName}</option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <div>
                       <label className="text-xs font-semibold text-[#1a1a1a]">Price</label>
                       <input
@@ -498,7 +568,7 @@ function App() {
                         placeholder="150000"
                         value={formProduct.Harga}
                         onChange={(e) => setFormProduct({ ...formProduct, Harga: e.target.value })}
-                        className="w-full p-2.5 mt-1 text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-xl focus:outline-none focus:border-[#000000] placeholder-[#838383]"
+                        className="w-full p-2 sm:p-2.5 mt-1 text-xs sm:text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-lg sm:rounded-xl focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] placeholder-[#838383] transition-colors"
                         required
                       />
                     </div>
@@ -509,7 +579,7 @@ function App() {
                         placeholder="10"
                         value={formProduct.Stok}
                         onChange={(e) => setFormProduct({ ...formProduct, Stok: e.target.value })}
-                        className="w-full p-2.5 mt-1 text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-xl focus:outline-none focus:border-[#000000] placeholder-[#838383]"
+                        className="w-full p-2 sm:p-2.5 mt-1 text-xs sm:text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-lg sm:rounded-xl focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] placeholder-[#838383] transition-colors"
                         required
                       />
                     </div>
@@ -520,7 +590,7 @@ function App() {
                       placeholder="It's a good thing, to buy, etc"
                       value={formProduct.Deskripsi}
                       onChange={(e) => setFormProduct({ ...formProduct, Deskripsi: e.target.value })}
-                      className="w-full p-2.5 mt-1 text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-xl focus:outline-none focus:border-[#000000] placeholder-[#838383] min-h-[100px] resize-y"
+                      className="w-full p-2 sm:p-2.5 mt-1 text-xs sm:text-sm bg-white border border-[#b2b2b2] text-[#1a1a1a] rounded-lg sm:rounded-xl focus:outline-none focus:border-[#000000] focus:ring-1 focus:ring-[#000000] placeholder-[#838383] min-h-[80px] sm:min-h-[100px] resize-y transition-colors"
                       required
                     />
                   </div>
@@ -531,58 +601,61 @@ function App() {
                       multiple
                       ref={inputFileRef}
                       onChange={(e) => setSelectedFiles(Array.from(e.target.files))}
-                      className="w-full text-xs mt-1 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#1a1a1a] file:text-[#b2b2b2] hover:file:bg-[#000000] file:transition-colors text-[#1a1a1a]"
+                      className="w-full text-xs mt-1 file:mr-2 sm:file:mr-4 file:py-2 file:px-3 sm:file:px-4 file:rounded-lg sm:file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#1a1a1a] file:text-[#b2b2b2] hover:file:bg-[#000000] file:transition-colors file:cursor-pointer text-[#1a1a1a]"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 text-white font-semibold text-sm rounded-xl transition-colors mt-2 bg-[#1a1a1a] hover:bg-[#000000] shadow-md"
+                    className="w-full py-2 sm:py-2.5 text-white font-semibold text-xs sm:text-sm rounded-lg sm:rounded-xl transition-all mt-2 bg-[#1a1a1a] hover:bg-[#000000] active:scale-95 shadow-md"
                   >
                     Save to Database
                   </button>
                 </form>
               </div>
 
-              <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-[#b2b2b2]/40 shadow-md w-full">
-                <h3 className="text-lg font-bold text-[#1a1a1a] mb-4">Product List</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-[#545454]">
-                    <thead className="bg-[#b2b2b2]/20 text-[#1a1a1a] text-xs uppercase font-bold">
+              {/* Product List - Responsive Table */}
+              <div className="lg:col-span-2 bg-white p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-[#b2b2b2]/40 shadow-md w-full">
+                <h3 className="text-base sm:text-lg font-bold text-[#1a1a1a] mb-4 font-folklore">Product List</h3>
+                <div className="overflow-x-auto -mx-4 sm:mx-0 sm:overflow-visible">
+                  <table className="w-full text-left text-xs sm:text-sm text-[#545454] min-w-[500px] sm:min-w-full">
+                    <thead className="bg-[#b2b2b2]/20 text-[#1a1a1a] text-xs uppercase font-bold sticky top-0 z-10">
                       <tr>
-                        <th className="p-3">Picture</th>
-                        <th className="p-3">Name</th>
-                        <th className="p-3">Price</th>
-                        <th className="p-3">Stock</th>
-                        <th className="p-3 text-center">Action</th>
+                        <th className="p-2 sm:p-3">Picture</th>
+                        <th className="p-2 sm:p-3">Name</th>
+                        <th className="p-2 sm:p-3">Price</th>
+                        <th className="p-2 sm:p-3">Stock</th>
+                        <th className="p-2 sm:p-3 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#b2b2b2]/30">
                       {products.map((p) => (
                         <tr key={p.ID} className="hover:bg-[#b2b2b2]/10 transition-colors">
-                          <td className="p-3">
+                          <td className="p-2 sm:p-3">
                             <img
                               src={p.Gambar ? p.Gambar.split(',')[0] : 'https://via.placeholder.com/50'}
                               alt={p.Namaproduk}
-                              className="w-10 h-10 object-contain bg-[#b2b2b2]/20 rounded-lg"
+                              className="w-8 h-8 sm:w-10 sm:h-10 object-contain bg-[#b2b2b2]/20 rounded"
                             />
                           </td>
-                          <td className="p-3 font-medium text-[#000000]">{p.Namaproduk}</td>
-                          <td className="p-3 text-[#1a1a1a]">Rp {Number(p.Harga).toLocaleString('id-ID')}</td>
-                          <td className="p-3 font-semibold text-[#1a1a1a]">{p.Stok}</td>
-                          <td className="p-3 text-center flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => handleEditClick(p)}
-                              className="px-3 py-1 text-xs font-bold text-white bg-[#545454] rounded-lg hover:bg-[#1a1a1a] transition-colors"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(p.ID)}
-                              className="px-3 py-1 text-xs font-bold text-white bg-[#838383] rounded-lg hover:bg-[#545454] transition-colors"
-                            >
-                              Delete
-                            </button>
+                          <td className="p-2 sm:p-3 font-medium text-[#000000] text-xs sm:text-sm line-clamp-2">{p.Namaproduk}</td>
+                          <td className="p-2 sm:p-3 text-[#1a1a1a] text-xs sm:text-sm whitespace-nowrap">Rp {Number(p.Harga).toLocaleString('id-ID')}</td>
+                          <td className="p-2 sm:p-3 font-semibold text-[#1a1a1a] text-xs sm:text-sm">{p.Stok}</td>
+                          <td className="p-2 sm:p-3">
+                            <div className="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+                              <button
+                                onClick={() => handleEditClick(p)}
+                                className="px-2 sm:px-3 py-1 text-xs font-bold text-white bg-[#545454] rounded hover:bg-[#1a1a1a] transition-colors active:scale-95 flex-shrink-0"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(p.ID)}
+                                className="px-2 sm:px-3 py-1 text-xs font-bold text-white bg-[#838383] rounded hover:bg-[#545454] transition-colors active:scale-95 flex-shrink-0"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -593,10 +666,17 @@ function App() {
             </div>
           )}
 
-          {/* TAB 2: CUSTOMER PAYMENTS SECTION */}
+          {/* Payments Tab */}
           {adminTab === 'payments' && (
             <div className="w-full">
               <AdminOrders />
+            </div>
+          )}
+
+          {/* Albums Tab (BARU) */}
+          {adminTab === 'albums' && (
+            <div className="w-full">
+              <AddAlbumForm onSuccess={() => toast.success('Album baru berhasil ditambahkan!')} />
             </div>
           )}
 
@@ -605,6 +685,7 @@ function App() {
 
       <Footer />
 
+      {/* Modals */}
       <Edit
         isOpen={isEditOpen}
         onClose={() => {
@@ -636,8 +717,8 @@ function ProductImageSlider({ gambarString, namaProduk }) {
 
   if (images.length === 0) {
     return (
-      <div className='w-full h-full bg-slate-100 flex items-center justify-center p-6 rounded-sm'>
-        <span className='text-xs text-slate-400 font-medium font-folklore'>No Image</span>
+      <div className='w-full h-full bg-slate-100 flex items-center justify-center p-4 sm:p-6 rounded-sm'>
+        <span className='text-xs sm:text-sm text-slate-400 font-medium font-folklore'>No Image</span>
       </div>
     );
   }
@@ -653,7 +734,7 @@ function ProductImageSlider({ gambarString, namaProduk }) {
   };
 
   return (
-    <div className='relative no-scrollbar w-full h-full group overflow-hidden bg-[#abaaaa] rounded-sm'>
+    <div className='relative w-full h-full group overflow-hidden bg-[#abaaaa] rounded-sm'>
       <img
         src={images[currentIndex]}
         alt={`${namaProduk} - ${currentIndex + 1}`}
@@ -664,29 +745,29 @@ function ProductImageSlider({ gambarString, namaProduk }) {
         <>
           <button
             onClick={prevSlide}
-            className='absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 border border-white/10'
+            className='absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 border border-white/10 active:scale-90'
             aria-label="Previous image"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
 
           <button
             onClick={nextSlide}
-            className='absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 border border-white/10'
+            className='absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center bg-black/40 hover:bg-black/70 backdrop-blur-sm text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 border border-white/10 active:scale-90'
             aria-label="Next image"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </button>
 
-          <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 bg-black/20 px-2 py-1 rounded-full backdrop-blur-[2px]'>
+          <div className='absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-1.5 z-10 bg-black/20 px-2 py-1 rounded-full backdrop-blur-[2px]'>
             {images.map((_, index) => (
               <span
                 key={index}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentIndex ? 'bg-white w-3' : 'bg-white/40'}`}
+                className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all duration-300 ${index === currentIndex ? 'bg-white w-2 sm:w-3' : 'bg-white/40'}`}
               ></span>
             ))}
           </div>
